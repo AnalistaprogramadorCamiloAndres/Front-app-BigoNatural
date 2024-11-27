@@ -39,34 +39,34 @@ const cliente = ref({
     <input type="text" id="cedula" v-model="cliente.CEDULA_DE_CIUDADANIA" required>
   </div>
 
+  <el-button>
+    <el-button type="primary" @click="updateForm">Actualizar</el-button>
+    <el-button type="primary" @click="submitForm">Guardar</el-button>
+    <el-button type="info" @click="resetForm">Eliminar</el-button>
 
-  <el-button type="primary" @click="updateForm">Actualizar</el-button>
-  <el-button type="primary" @click="submitForm">Guardar</el-button>
-  <el-button type="info" @click="resetForm">Eliminar</el-button>
-
+  </el-button>
 </template>
 
 <style scoped>
- .container {
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f2f2f2;
-  }
-  .form-group {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: #f2f2f2;
-    padding: 20px;
+.container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f2f2f2;
+}
 
-  }
-  
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #f2f2f2;
+  padding: 20px;
 
+}
 </style>

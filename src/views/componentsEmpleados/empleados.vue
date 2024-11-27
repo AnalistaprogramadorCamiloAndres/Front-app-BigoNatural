@@ -13,6 +13,11 @@ const empleados = ref({
     CEDULA_DE_CIUDADANIA: '',
 });
 
+const updateForm = () => {
+
+
+};
+
 </script>
 
 <template>
@@ -46,8 +51,8 @@ const empleados = ref({
     <el-button>
 
         <el-button type="primary" @click="updateForm">Actualizar</el-button>
-        <el-button type="primary" @click="submitForm">Guardar</el-button>
-        <el-button type="default" @click="resetForm">Eliminar</el-button>
+        <el-button type="primary" @click="saveForm">Guardar</el-button>
+        <el-button type="default" @click="deletForm">Eliminar</el-button>
 
 
     </el-button>

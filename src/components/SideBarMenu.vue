@@ -9,13 +9,14 @@
         </el-icon>
         <span>Administrador</span>
       </template>
-
+      
+      <el-menu-item index="/">Inicio</el-menu-item>
       <el-menu-item index="cliente">Cliente</el-menu-item>
       <el-menu-item index="empleados">Empleados</el-menu-item>
       <el-menu-item index="facturacion">Facturacion</el-menu-item>
       <el-menu-item index="producto">Producto</el-menu-item>
       <el-menu-item index="proveedor">Proveedor</el-menu-item>
-      <el-menu-item index="/">Inicio</el-menu-item>
+   
     </el-sub-menu>
   </el-menu>
 </template>

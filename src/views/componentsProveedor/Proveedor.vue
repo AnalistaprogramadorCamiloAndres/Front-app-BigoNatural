@@ -15,7 +15,103 @@ const Proveedor = ref({
 
 });
 
+const saveForm = () => {
+    try {
+        if (Proveedor.value.ID_LOTE === '' ||
+            Proveedor.value.CANTIDAD_PRODUCIDA === '' ||
+            Proveedor.value.FECHA_DE_PRODUCCION === '' ||
+            Proveedor.value.FECHA_DE_VENCIMIENTO === '' ||
+            Proveedor.value.PROVEEDOR_DE_MATERIA_PRIMA === '' ||
+            Proveedor.value.UBICACION_DE_ALMACENAMIENTO === '' ||
+            Proveedor.value.ID_PRODUCTO_FK === '' ||
+            Proveedor.value.ID_INSPECCION_DE_CALIDAD_FK === '' ||
+            Proveedor.value.ID_ENVIO_FK === ''
+        ) {
+            alert('Todos los campos son obligatorios');
+            return;
+        }
+        console.log('Formulario guardado correctamente');
+        Proveedor.value = {
+            ID_LOTE: '',
+            CANTIDAD_PRODUCIDA: '',
+            FECHA_DE_PRODUCCION: '',
+            FECHA_DE_VENCIMIENTO: '',
+            PROVEEDOR_DE_MATERIA_PRIMA: '',
+            UBICACION_DE_ALMACENAMIENTO: '',
+            ID_PRODUCTO_FK: '',
+            ID_INSPECCION_DE_CALIDAD_FK: '',
+            ID_ENVIO_FK: '',
+        };
+    } catch (error) {
+        console.error(error);
+    }
+};
 
+const updateForm = () => {
+    try {
+        if (
+            Proveedor.value.ID_LOTE === '' ||
+            Proveedor.value.CANTIDAD_PRODUCIDA === '' ||
+            Proveedor.value.FECHA_DE_PRODUCCION === '' ||
+            Proveedor.value.FECHA_DE_VENCIMIENTO === '' ||
+            Proveedor.value.PROVEEDOR_DE_MATERIA_PRIMA === '' ||
+            Proveedor.value.UBICACION_DE_ALMACENAMIENTO === '' ||
+            Proveedor.value.ID_PRODUCTO_FK === '' ||
+            Proveedor.value.ID_INSPECCION_DE_CALIDAD_FK === '' ||
+            Proveedor.value.ID_ENVIO_FK === ''
+        ) {
+            alert('Todos los campos son obligatorios');
+            return;
+        }
+        console.log('Formulario actualizado correctamente');
+        Proveedor.value = {
+            ID_LOTE: '',
+            CANTIDAD_PRODUCIDA: '',
+            FECHA_DE_PRODUCCION: '',
+            FECHA_DE_VENCIMIENTO: '',
+            PROVEEDOR_DE_MATERIA_PRIMA: '',
+            UBICACION_DE_ALMACENAMIENTO: '',
+            ID_PRODUCTO_FK: '',
+            ID_INSPECCION_DE_CALIDAD_FK: '',
+            ID_ENVIO_FK: '',
+        };
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+const deletForm = () => {
+    try {
+        if (
+            Proveedor.value.ID_LOTE === '' ||
+            Proveedor.value.CANTIDAD_PRODUCIDA === '' ||
+            Proveedor.value.FECHA_DE_PRODUCCION === '' ||
+            Proveedor.value.FECHA_DE_VENCIMIENTO === '' ||
+            Proveedor.value.PROVEEDOR_DE_MATERIA_PRIMA === '' ||
+            Proveedor.value.UBICACION_DE_ALMACENAMIENTO === '' ||
+            Proveedor.value.ID_PRODUCTO_FK === '' ||
+            Proveedor.value.ID_INSPECCION_DE_CALIDAD_FK === '' ||
+            Proveedor.value.ID_ENVIO_FK === ''
+        ) {
+            alert('Todos los campos son obligatorios');
+            return;
+        }
+        console.log('Formulario eliminado correctamente');
+        Proveedor.value = {
+            ID_LOTE: '',
+            CANTIDAD_PRODUCIDA: '',
+            FECHA_DE_PRODUCCION: '',
+            FECHA_DE_VENCIMIENTO: '',
+            PROVEEDOR_DE_MATERIA_PRIMA: '',
+            UBICACION_DE_ALMACENAMIENTO: '',
+            ID_PRODUCTO_FK: '',
+            ID_INSPECCION_DE_CALIDAD_FK: '',
+            ID_ENVIO_FK: '',
+        };
+    } catch (error) {
+        console.error(error);
+    }
+};
 </script>
 
 <template>
@@ -32,10 +128,10 @@ const Proveedor = ref({
             <el-input v-model="Proveedor.CANTIDAD_PRODUCIDA" placeholder="CANTIDAD PRODUCIDA"></el-input>
         </el-form-item>
         <el-form-item label="FECHA DE PRODUCCION">
-            <el-input v-model="Proveedor.FECHA_DE_PRODUCCION" placeholder="FECHA DE PRODUCCION"></el-input>
+            <el-input type="date" v-model="Proveedor.FECHA_DE_PRODUCCION" placeholder="FECHA DE PRODUCCION"></el-input>
         </el-form-item>
         <el-form-item label="FECHA DE VENCIMIENTO">
-            <el-input v-model="Proveedor.FECHA_DE_VENCIMIENTO" placeholder="FECHA DE VENCIMIENTO"></el-input>
+            <el-input type="date" v-model="Proveedor.FECHA_DE_VENCIMIENTO" placeholder="FECHA DE VENCIMIENTO"></el-input>
         </el-form-item>
         <el-form-item label="PROVEEDOR DE MATERIA PRIMA">
             <el-input v-model="Proveedor.PROVEEDOR_DE_MATERIA_PRIMA" placeholder="PROVEEDOR DE MATERIA PRIMA"></el-input>
@@ -44,7 +140,7 @@ const Proveedor = ref({
             <el-input v-model="Proveedor.UBICACION_DE_ALMACENAMIENTO" placeholder="UBICACION DE ALMACENAMIENTO"></el-input>
         </el-form-item>
         <el-form-item label="ID PRODUCTO">
-            <el-input v-model="Proveedor.ID_PRODUCTO_FK" placeholder="ID PRODUCTO"></el-input>
+            <el-input type="select" v-model="Proveedor.ID_PRODUCTO_FK" placeholder="ID PRODUCTO"></el-input>
         </el-form-item>
         <el-form-item label="ID INSPECCION DE CALIDAD">
             <el-input v-model="Proveedor.ID_INSPECCION_DE_CALIDAD_FK" placeholder="ID INSPECCION DE CALIDAD"></el-input>
@@ -56,11 +152,10 @@ const Proveedor = ref({
     </el-form>
 
     <el-button>
-        <el-button type="primary" @click="submitForm">Guardar</el-button>
+        <el-button type="primary" @click="saveForm">Guardar</el-button>
         <el-button type="primary" @click="updateForm">Actualizar</el-button>
-        <el-button @click="resetForm">Eliminar</el-button>
+        <el-button @click="deletForm">Eliminar</el-button>
     </el-button>
-    
 </template>
 
 <style scoped>
