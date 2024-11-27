@@ -1,11 +1,14 @@
 <script setup>
-import LayoutMain from './components/LayoutMain.vue';
+
+
 
 </script>
 
 <template>
+   
+    <router-view> </router-view>
  
-<LayoutMain/>
+
 
 </template>
 

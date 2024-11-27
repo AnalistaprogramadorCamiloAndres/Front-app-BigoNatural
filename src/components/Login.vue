@@ -3,6 +3,7 @@
 </script>
 
 <template>
+  <LayoutMain />
     <div class="login-container">
     <h2>Iniciar Sesión</h2>
     
@@ -27,11 +28,24 @@
 <style>
 
 .login-container {
-    width: 50px;
-    margin: 0 auto;
-    padding: 20px;
-    min-height: 50dvh;
-    height: 30px;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+  text-align: center;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+  overflow: hidden;
+  margin-top: 50px;
+  /* Posición en el centro de la pantalla */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  /* Efecto de desvanecimiento y aparecimiento */
+ 
 
     
 }

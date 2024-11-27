@@ -1,43 +1,56 @@
 <script setup>
-import Login from './Login.vue';
-import NavBar from './NavBar.vue';
+import Login from '../components/Login.vue';
+import Formulario from '../components/Formulario.vue';
+import SideBarMenu from '../components/SideBarMenu.vue';
+//import NavBar from '../components/NavBar.vue';
+
+
+
 </script>
 
 <template>
-    <div>
+  <Formulario />
 
-        <div class="common-layout">
-            <el-container>
-                <el-header>Header</el-header>
-            </el-container>
-            <el-container class="NavBar">
-                <NavBar />
-            </el-container>
-
-            <el-container>
-
-                <Login />
-
-            </el-container>
-
-        </div>
+  <el-login>
+    <Login />
+  </el-login>
 
 
+  <el-container style="height: 100vh;">
 
-    </div>
+    <el-container>
+      <el-aside width="auto">
+        <SideBarMenu />
+      </el-aside>
+
+      <el-main class="main-content">
+        <slot name="slotLayout"></slot>
+      </el-main>
+    </el-container>
+  </el-container>
+
+  <el-header class="el-header">
+    <NavBar />
+  </el-header>
 </template>
 
-<style lang="css">
-.el-header {
-    background-color: #409eff;
-    color: #fff;
-    text-align: center;
-    padding: 20px 0;
+<style scoped>
+.el-header{
+  background-color: #f4f4f4;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
+  color: #333;
 }
-.NavBar {
-    background-color: #333;
-    color: #fff;
-    padding: 10px;
+.el-header {
+  padding: 0;
+}
 
+.el-aside {
+  background-color: #f4f4f4;
+}
+
+.main-content {
+  position: relative;
 }
 </style>
