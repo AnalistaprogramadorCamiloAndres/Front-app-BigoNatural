@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   plugins: [vue()],
   build: {
-    outdir: 'dist'
+    outDir: 'dist'
   },
   resolve: {
     alias: {
