@@ -5,11 +5,6 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     outDir: 'dist'
-  },
-  resolve: {
-    alias: {
-      '@': '/src',
-    },
-  },
+  }
 });
 
