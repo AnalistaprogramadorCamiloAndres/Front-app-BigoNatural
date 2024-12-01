@@ -1,232 +1,282 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import SideBarMenu from '../../components/SideBarMenu.vue';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
-const facturacion = ref({
+// Datos reactivos
+const facturacion = reactive({
   ID_CLIENTE: '',
+  ID_FACTURA: '',
   FACTURA_FECHA: '',
   TOTAL_DE_LA_FACTURA: '',
   METODO_DE_PAGO: '',
   ID_PRODUCTO: '',
-  ID_CLIENTE: '',
 });
 
+const metodosDePago = [
+  {
+    value: '1',
+    label: 'Efectivo'
+  },
+  {
+    value: '2',
+    label: 'Nequi'
+  },
+  {
+    value: '3',
+    label: 'Daviplata'
+  }
+]
 
-const saveForm = () => {
+const loading = ref(false);
+const apiUrl = 'http://127.0.0.1:8000/api/api/facturacion';
 
-  const url = 'http://127.0.0.1:8000/api/api/facturacion';
+// Funciones de manejo del formulario
+const resetForm = () => {
+  Object.keys(facturacion).forEach((key) => (facturacion[key] = ''));
+};
 
-  try {
-
-    if (
-      !facturacion.value.ID_CLIENTE ||
-      !facturacion.value.FACTURA_FECHA ||
-      !facturacion.value.TOTAL_DE_LA_FACTURA ||
-      !facturacion.value.METODO_DE_PAGO ||
-      !facturacion.value.ID_PRODUCTO
-    ) {
-      alert('Todos los campos son obligatorios');
-      return;
+const validateForm = () => {
+  return Object.values(facturacion).every((value) => {
+    if (typeof value === 'string') {
+      return value.trim() !== '';
     }
-    console.log(facturacion.value, 'facturacion.value');
-    axios.post(url, facturacion.value)
-      .then((response) => {
-        console.log('Respuesta:', response);
-        alert('Factura registrada correctamente');
+    return value !== null && value !== undefined; // Valida valores no nulos para otros tipos
+  });
+};
 
-        facturacion.value = {
-          ID_CLIENTE: '',
-          FACTURA_FECHA: '',
-          TOTAL_DE_LA_FACTURA: '',
-          METODO_DE_PAGO: '',
-          ID_PRODUCTO: '',
-        };
-      })
-      .catch((error) => {
-        console.error('Error al guardar:', error);
-        alert('Ocurrió un error al guardar la factura');
-      });
+const saveForm = async () => {
+  if (!validateForm()) {
+    alert('Todos los campos son obligatorios');
+    return;
+  }
+
+  // Convertir la fecha al formato requerido por MySQL
+  facturacion.FACTURA_FECHA = dayjs(facturacion.FACTURA_FECHA).format('YYYY-MM-DD');
+
+  loading.value = true;
+  try {
+    const response = await axios.post(apiUrl, facturacion);
+    alert('Factura registrada correctamente');
+    resetForm();
   } catch (error) {
-    console.error('Error al ejecutar la función:', error);
-    alert('Error inesperado al intentar guardar la factura');
+    console.error('Error al guardar:', error);
+    alert('Ocurrió un error al guardar la factura');
+  } finally {
+    loading.value = false;
   }
 };
 
-const updateForm = () => {
-
-  const url = 'http://127.0.0.1:8000/api/api/facturacion';
-
-  try {
-    if (
-      facturacion.value.ID_CLIENTE === '' ||
-      facturacion.value.ID_FACTURA === '' ||
-      facturacion.value.FACTURA_FECHA === '' ||
-      facturacion.value.TOTAL_DE_LA_FACTURA === '' ||
-      facturacion.value.METODO_DE_PAGO === '' ||
-      facturacion.value.ID_PRODUCTO === ''
-    ) {
-      alert('Todos los campos son obligatorios');
-      return;
-    }
-    console.log('Actualizado:', facturacion.value);
-    alert('Factura actualizada correctamente');
-
-    axioxs.put(url + facturacion.value.ID_FACTURA, facturacion.value)
-      .then((response) => {
-        console.log('Respuesta:', response);
-      })
-
+const updateForm = async () => {
+  if (!validateForm()) {
+    alert('Todos los campos son obligatorios');
+    return;
   }
-  catch (error) {
+  if (!facturacion.ID_FACTURA) {
+    alert('Debe especificar el ID de la factura para actualizar');
+    return;
+  }
+
+  // Convertir la fecha al formato requerido por MySQL
+  facturacion.FACTURA_FECHA = dayjs(facturacion.FACTURA_FECHA).format('YYYY-MM-DD');
+
+  loading.value = true;
+  try {
+    const response = await axios.put(`${apiUrl}/${facturacion.ID_FACTURA}`, facturacion);
+    alert('Factura actualizada correctamente');
+  } catch (error) {
     console.error('Error al actualizar:', error);
     alert('Ocurrió un error al actualizar la factura');
-
+  } finally {
+    loading.value = false;
   }
 };
 
-
-
-const deletForm = () => {
-  const url = 'http://127.0.0.1:8000/api/api/facturacion';
+const deleteForm = async () => {
+  if (!facturacion.ID_FACTURA) {
+    alert('Debe seleccionar una factura para eliminar');
+    return;
+  }
+  loading.value = true;
   try {
-    if (facturacion.value.ID_CLIENTE === '' || facturacion.value.ID_FACTURA === '') {
-      alert('Debe seleccionar una factura para eliminar');
-      return;
-    }
-    console.log('Eliminado:', facturacion.value);
+    const response = await axios.delete(`${apiUrl}/${facturacion.ID_FACTURA}`);
     alert('Factura eliminada correctamente');
-    facturacion.value = {
-      ID_CLIENTE: '',
-      ID_FACTURA: '',
-      FACTURA_FECHA: '',
-      TOTAL_DE_LA_FACTURA: '',
-      METODO_DE_PAGO: '',
-      ID_PRODUCTO: '',
-    };
-    axioxs.delete(url + facturacion.value.ID_FACTURA)
-      .then((response) => {
-        console.log('Respuesta:', response);
-      })
+    resetForm();
   } catch (error) {
     console.error('Error al eliminar:', error);
     alert('Ocurrió un error al eliminar la factura');
+  } finally {
+    loading.value = false;
   }
 };
-
-
 </script>
 
+
 <template>
-  <el-header class="el-header">
+  <el-header>
     <NavBar />
   </el-header>
 
-  <div class="sidebar">
-    <SideBarMenu />
-  </div>
-
-  <div class="container">
-    <h1>MODULO FACTURA</h1>
-  </div>
-
-  <el-form-item>
-
-    <div class="form">
-
-      <label for="ID_CLIENTE">ID Cliente:</label>
-      <input type="text" id="ID_CLIENTE" v-model="facturacion.ID_CLIENTE">
-
-
-      <label for="ID_FACTURA">ID Factura:</label>
-      <input type="text" id="ID_FACTURA" v-model="facturacion.ID_FACTURA">
-
-      <label for="FACTURA_FECHA">Fecha de la Factura:</label>
-      <input type="date" id="FACTURA_FECHA" v-model="facturacion.FACTURA_FECHA">
-
-      <label for="TOTAL_DE_LA_FACTURA">Total de la Factura:</label>
-      <input type="text" id="TOTAL_DE_LA_FACTURA" v-model="facturacion.TOTAL_DE_LA_FACTURA">
-
-      <label for="METODO_DE_PAGO">Metodo de Pago:</label>
-      <input type="text" id="METODO_DE_PAGO" v-model="facturacion.METODO_DE_PAGO">
-
-      <label for="ID_PRODUCTO">ID Producto:</label>
-      <input type="text" id="ID_PRODUCTO" v-model="facturacion.ID_PRODUCTO">
-
-
-
+  <div class="layout">
+    <div class="sidebar">
+      <SideBarMenu />
     </div>
-  </el-form-item>
 
-  <el-button>
-    <el-button type="primary" @click="saveForm">Guardar</el-button>
-    <el-button type="primary" @click="updateForm">Actualizar</el-button>
-    <el-button type="danger" @click="deletForm">Eliminar</el-button>
-  </el-button>
+    <div class="content">
+      <h1 class="form-title">MODULO FACTURA</h1>
+      <el-card class="form-card" shadow="always">
+        <el-form label-position="top" class="form">
+          <!-- Fila 1 -->
+          <div class="row">
+            <div class="col-md-6">
+              <el-form-item label="Fecha de la Factura">
+                <el-date-picker
+                  v-model="facturacion.FACTURA_FECHA"
+                  type="date"
+                  placeholder="Seleccione la fecha"
+                  size="large"
+                />
+              </el-form-item>
+            </div>
+            <div class="col-md-6">
+              <el-form-item label="ID Factura">
+                <el-input
+                  v-model="facturacion.ID_FACTURA"
+                  placeholder="Ingrese el ID de la factura"
+                  size="large"
+                />
+              </el-form-item>
+            </div>
+          </div>
+          <!-- Fila 2 -->
+          <div class="row">
+            <div class="col-md-6">
+              <el-form-item label="ID Cliente">
+                <el-input
+                  v-model="facturacion.ID_CLIENTE"
+                  placeholder="Ingrese el ID del cliente"
+                  size="large"
+                />
+              </el-form-item>
+            </div>
+            <div class="col-md-6">
+              <el-form-item label="ID Producto">
+                <el-input
+                  v-model="facturacion.ID_PRODUCTO"
+                  placeholder="Ingrese el ID del producto"
+                  size="large"
+                />
+              </el-form-item>
+            </div>
+          </div>
+          <!-- Fila 3 -->
+          <div class="row">
+            <div class="col-md-6">
+              <el-form-item label="Método de Pago">
+  <el-select
+    v-model="facturacion.METODO_DE_PAGO"
+    placeholder="Seleccione el método de pago"
+    size="large"
+  >
+    <el-option
+      v-for="opcion in metodosDePago"
+      :key="opcion"
+      :label="opcion.label"
+      :value="opcion.value"
+    />
+  </el-select>
+</el-form-item>
+
+            </div>
+            <div class="col-md-6">
+              <el-form-item label="Total de la Factura">
+                <el-input
+                  v-model="facturacion.TOTAL_DE_LA_FACTURA"
+                  placeholder="Ingrese el total"
+                  size="large"
+                />
+              </el-form-item>
+            </div>
+          </div>
+        </el-form>
+        <div class="actions">
+          <el-button type="primary" :loading="loading" @click="saveForm" size="large">Guardar</el-button>
+          <el-button type="warning" :loading="loading" @click="updateForm" size="large">Actualizar</el-button>
+          <el-button type="danger" :loading="loading" @click="deleteForm" size="large">Eliminar</el-button>
+        </div>
+      </el-card>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.el-form-item {
-  margin-bottom: 200px;
-  gap: 100;
+.layout {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
   flex-direction: column;
-  flex-basis: 100%;
-  width: 100%;
-  flex-wrap: wrap;
+  align-items: center;
+  background-color: #f2f3f5;
   gap: 20px;
 }
 
-.form {
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-  justify-content: flex-start;
-  flex-basis: 100%;
-  flex-wrap: wrap;
-  gap: 10px;
-
-}
-
-.container {
-  padding: 20px;
+.form-title {
+  font-size: 2rem;
+  font-weight: bold;
   text-align: center;
-  background-color: #F2F3F5;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  margin-top: 10px;
 }
 
-
-.sidebar {
-  display: inline-block;
-  width: 200px;
-  background-color: #333;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  height: 100vh;
-  overflow-y: auto;
-  transition: all 0.3s ease;
+.form-card {
+  width: 80%;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.el-button {
+.form {
+  margin: 0;
+}
 
-  width: 100%;
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.col-md-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+  padding: 10px;
+}
+
+.col-md-12 {
+  flex: 0 0 100%;
+  max-width: 100%;
+  padding: 10px;
+}
+
+.actions {
   display: flex;
   justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+}
 
-  align-items: center;
-
-  height: inherit;
-
-
+.actions > .el-button {
+  min-width: 150px;
 }
 </style>
