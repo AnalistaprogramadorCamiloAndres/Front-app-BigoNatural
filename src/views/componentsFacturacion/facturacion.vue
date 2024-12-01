@@ -4,7 +4,7 @@ import SideBarMenu from '../../components/SideBarMenu.vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
-// Datos reactivos
+// Datos reactivos para el formulario
 const facturacion = reactive({
   ID_CLIENTE: '',
   ID_FACTURA: '',
@@ -26,11 +26,15 @@ const productos = ref([]);
 const productoSeleccionado = ref(null);
 const loading = ref(false);
 
+// API URLs
 const apiFacturacion = 'http://127.0.0.1:8000/api/api/facturacion';
 const apiClientes = 'http://127.0.0.1:8000/api/api/cliente';
 const apiProductos = 'http://127.0.0.1:8000/api/api/producto';
 
-// Funciones de manejo del formulario
+// Listado de facturas
+const facturas = ref([]);
+
+// Funciones para el formulario
 const resetForm = () => {
   Object.keys(facturacion).forEach((key) => (facturacion[key] = key === 'CANTIDAD' ? 1 : ''));
   facturacion.TOTAL_DE_LA_FACTURA = 0;
@@ -45,7 +49,6 @@ const validateForm = () => {
   });
 };
 
-// Calcular total dinámicamente
 const calcularTotal = () => {
   if (productoSeleccionado.value) {
     const precio = parseFloat(productoSeleccionado.value.PRECIO || 0);
@@ -67,6 +70,7 @@ const saveForm = async () => {
     await axios.post(apiFacturacion, facturacion);
     alert('Factura registrada correctamente');
     resetForm();
+    fetchFacturas(); // Actualiza el listado después de guardar
   } catch (error) {
     console.error('Error al guardar:', error);
     alert('Ocurrió un error al guardar la factura');
@@ -105,15 +109,32 @@ const fetchProductos = async () => {
   }
 };
 
-// Escuchar cambios en el producto seleccionado
 const actualizarProductoSeleccionado = (idProducto) => {
   productoSeleccionado.value = productos.value.find((prod) => prod.ID_PRODUCTO === idProducto) || null;
   calcularTotal();
 };
 
+// Cargar listado de facturas
+const fetchFacturas = async () => {
+  loading.value = true;
+  try {
+    const response = await axios.get(apiFacturacion);
+    if (response.data.status === '200') {
+      facturas.value = response.data.data;
+    }
+  } catch (error) {
+    console.error('Error al cargar las facturas:', error);
+    alert('Ocurrió un error al cargar las facturas.');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Inicializar datos al montar
 onMounted(() => {
   fetchClientes();
   fetchProductos();
+  fetchFacturas();
 });
 </script>
 
@@ -128,10 +149,10 @@ onMounted(() => {
     </div>
 
     <div class="content">
+      <!-- Formulario -->
       <h1 class="form-title">MODULO FACTURA</h1>
       <el-card class="form-card" shadow="always">
         <el-form label-position="top" class="form">
-          <!-- Fila 1 -->
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Fecha de la Factura">
@@ -153,7 +174,6 @@ onMounted(() => {
               </el-form-item>
             </div>
           </div>
-          <!-- Fila 2 -->
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Cliente">
@@ -189,7 +209,6 @@ onMounted(() => {
               </el-form-item>
             </div>
           </div>
-          <!-- Fila 3 -->
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Cantidad">
@@ -218,7 +237,6 @@ onMounted(() => {
               </el-form-item>
             </div>
           </div>
-          <!-- Fila 4 -->
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Total de la Factura">
@@ -233,20 +251,28 @@ onMounted(() => {
         </el-form>
         <div class="actions">
           <el-button type="primary" :loading="loading" @click="saveForm" size="large">Guardar</el-button>
-          <el-button type="warning" :loading="loading" @click="updateForm" size="large">Actualizar</el-button>
-          <el-button type="danger" :loading="loading" @click="deleteForm" size="large">Eliminar</el-button>
         </div>
+      </el-card>
+
+      <!-- Listado de Facturas -->
+      <h2 class="form-title">LISTADO DE FACTURAS</h2>
+      <el-card class="form-card" shadow="always">
+        <el-table :data="facturas" style="width: 100%" v-loading="loading">
+          <el-table-column prop="ID_FACTURA" label="ID Factura" width="150" />
+          <el-table-column prop="FACTURA_FECHA" label="Fecha" width="150" />
+          <el-table-column prop="ID_CLIENTE" label="ID Cliente" width="150" />
+          <el-table-column prop="TOTAL_DE_LA_FACTURA" label="Total" width="150" />
+        </el-table>
       </el-card>
     </div>
   </div>
 </template>
 
-
-
 <style scoped>
 .layout {
   display: flex;
-  height: 100vh;
+  min-height: 100vh; /* Asegura que la altura mínima sea el 100% de la pantalla */
+  overflow: hidden; /* Evita que el contenido se desborde horizontalmente */
 }
 
 .sidebar {
@@ -254,6 +280,7 @@ onMounted(() => {
   background-color: #333;
   color: #fff;
   padding: 20px;
+  overflow-y: auto; /* Permite desplazamiento si el contenido en la barra lateral excede su tamaño */
 }
 
 .content {
@@ -264,20 +291,29 @@ onMounted(() => {
   align-items: center;
   background-color: #f2f3f5;
   gap: 20px;
+  overflow-y: auto; /* Permite desplazamiento vertical */
+  max-height: 100vh; /* Restringe la altura máxima al tamaño de la pantalla */
+  box-sizing: border-box; /* Incluye el padding dentro del tamaño total del contenedor */
 }
 
 .form-title {
   font-size: 2rem;
   font-weight: bold;
   text-align: center;
-  margin-top: 10px;
+  margin: 20px 0;
 }
 
-.form-card {
-  width: 80%;
+.form-card, .table-card {
+  width: 90%; /* Ajusta el ancho a un 90% para mayor consistencia */
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  overflow: visible; /* Asegura que no se corten los campos dentro del formulario */
+}
+
+.table-card {
+  margin-top: 20px;
 }
 
 .form {
@@ -311,5 +347,17 @@ onMounted(() => {
 
 .actions > .el-button {
   min-width: 150px;
+}
+
+.el-table {
+  width: 100%;
+}
+
+/* Asegura el desplazamiento en pantallas pequeñas */
+html, body {
+  height: 100%; /* Asegura que el body ocupe toda la pantalla */
+  margin: 0;
+  padding: 0;
+  overflow-y: auto; /* Permite el desplazamiento vertical de toda la página */
 }
 </style>
