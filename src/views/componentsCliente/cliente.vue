@@ -1,13 +1,130 @@
 <script setup>
-import SideBarMenu from '../../components/SideBarMenu.vue';
 import { ref } from 'vue';
-
+import SideBarMenu from '../../components/SideBarMenu.vue';
+import axios from 'axios';
 const cliente = ref({
   NOMBRE: '',
   CORREO_ELECTRONICO: '',
   DIRECCION: '',
   CEDULA_DE_CIUDADANIA: '',
 });
+
+const saveForm = async () => {
+  const url = 'http://127.0.0.1:8000/api/api/cliente'; // Replace with your API endpoint
+
+
+  try {
+
+    if (
+      !cliente.value.NOMBRE ||
+      !cliente.value.CORREO_ELECTRONICO ||
+      !cliente.value.DIRECCION ||
+      !cliente.value.CEDULA_DE_CIUDADANIA
+    ) {
+      alert('Todos los campos son obligatorios');
+      return;
+    }
+    console.log(cliente.value, 'cliente.value');
+    axios.post(url, cliente.value)
+      .then((response) => {
+        console.log('Respuesta:', response);
+        alert('Registro guardado correctamente');
+
+        cliente.value = {
+          NOMBRE: '',
+          CORREO_ELECTRONICO: '',
+          DIRECCION: '',
+          CEDULA_DE_CIUDADANIA: '',
+        };
+      })
+      .catch((error) => {
+        console.error('Error al guardar el registro:', error);
+        alert('Ocurrió un error al guardar el registro.');
+      });
+  } catch (error) {
+    console.error('Error al ejecutar la función:', error);
+    alert('Error inesperado al intentar guardar el registro.');
+  }
+};
+
+
+const updateForm = async () => {
+
+  const url = `http://127.0.0.1:8000/api/api/clientes`;
+
+
+  try {
+
+    if (
+      !cliente.value.NOMBRE ||
+      !cliente.value.CORREO_ELECTRONICO ||
+      !cliente.value.DIRECCION ||
+      !cliente.value.CEDULA_DE_CIUDADANIA
+    ) {
+      alert('Todos los campos son obligatorios');
+
+    }
+    console.log(cliente.value, 'cliente.value');
+    axios.put(url, cliente.value)
+      .then((response) => {
+        console.log('Respuesta:', response);
+        alert('Registro actualizado correctamente');
+
+        cliente.value = {
+          NOMBRE: '',
+          CORREO_ELECTRONICO: '',
+          DIRECCION: '',
+          CEDULA_DE_CIUDADANIA: '',
+        };
+      })
+      .catch((error) => {
+        console.error('Error al actualizar el registro:', error);
+        alert('Ocurrió un error al actualizar el registro.');
+      });
+  } catch (error) {
+    console.error('Error al ejecutar la función:', error);
+    alert('Error inesperado al intentar guardar la factura');
+  }
+};
+
+
+const deletForm = async () => {
+
+  const url = `http://127.0.0.1:8000/api/api/clientes`; // Replace with your API endpoint
+
+  try {
+
+    if (
+      !cliente.value.NOMBRE ||
+      !cliente.value.CORREO_ELECTRONICO ||
+      !cliente.value.DIRECCION ||
+      !cliente.value.CEDULA_DE_CIUDADANIA
+    ) {
+      alert('Todos los campos son obligatorios');
+      return;
+    }
+    console.log(cliente.value, 'cliente.value');
+    axios.delete(url, cliente.value)
+      .then((response) => {
+        console.log('Respuesta:', response);
+        alert('Registro eliminado correctamente');
+
+        cliente.value = {
+          NOMBRE: '',
+          CORREO_ELECTRONICO: '',
+          DIRECCION: '',
+          CEDULA_DE_CIUDADANIA: '',
+        };
+      })
+      .catch((error) => {
+        console.error('Error al eliminar el registro:', error);
+        alert('Ocurrió un error al eliminar el registro.');
+      });
+  } catch (error) {
+    console.error('Error al ejecutar la función:', error);
+    alert('Error inesperado al intentar guardar la factura');
+  }
+};
 
 
 </script>
@@ -41,8 +158,8 @@ const cliente = ref({
 
   <el-button>
     <el-button type="primary" @click="updateForm">Actualizar</el-button>
-    <el-button type="primary" @click="submitForm">Guardar</el-button>
-    <el-button type="info" @click="resetForm">Eliminar</el-button>
+    <el-button type="primary" @click="saveForm">Guardar</el-button>
+    <el-button type="info" @click="deletForm">Eliminar</el-button>
 
   </el-button>
 </template>
