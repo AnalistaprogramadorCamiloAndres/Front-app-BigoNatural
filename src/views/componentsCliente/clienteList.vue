@@ -95,11 +95,11 @@ onMounted(() => {
       </div>
       <el-card class="form-card" shadow="always">
         <el-table :data="clientes" style="width: 100%" v-loading="loading">
-          <el-table-column prop="ID_CLIENTE" label="ID" />
+          <el-table-column prop="ID_CLIENTE" label="ID" width="50"/>
           <el-table-column prop="NOMBRE" label="Nombre" />
           <el-table-column prop="CORREO_ELECTRONICO" label="Correo" />
           <el-table-column prop="CEDULA_DE_CIUDADANIA" label="Cédula" />
-          <el-table-column label="Acciones">
+          <el-table-column label="Acciones" width="200">
             <template #default="scope">
               <div class="action-buttons">
                 <el-button type="warning" @click="updateCliente(scope.row)">
