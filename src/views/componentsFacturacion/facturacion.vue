@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import SideBarMenu from '../../components/SideBarMenu.vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -9,32 +9,31 @@ const facturacion = reactive({
   ID_CLIENTE: '',
   ID_FACTURA: '',
   FACTURA_FECHA: '',
-  TOTAL_DE_LA_FACTURA: '',
+  CANTIDAD: 1,
+  TOTAL_DE_LA_FACTURA: 0,
   METODO_DE_PAGO: '',
   ID_PRODUCTO: '',
 });
 
 const metodosDePago = [
-  {
-    value: '1',
-    label: 'Efectivo'
-  },
-  {
-    value: '2',
-    label: 'Nequi'
-  },
-  {
-    value: '3',
-    label: 'Daviplata'
-  }
-]
+  { value: '1', label: 'Efectivo' },
+  { value: '2', label: 'Nequi' },
+  { value: '3', label: 'Daviplata' },
+];
 
+const clientes = ref([]);
+const productos = ref([]);
+const productoSeleccionado = ref(null);
 const loading = ref(false);
-const apiUrl = 'http://127.0.0.1:8000/api/api/facturacion';
+
+const apiFacturacion = 'http://127.0.0.1:8000/api/api/facturacion';
+const apiClientes = 'http://127.0.0.1:8000/api/api/cliente';
+const apiProductos = 'http://127.0.0.1:8000/api/api/producto';
 
 // Funciones de manejo del formulario
 const resetForm = () => {
-  Object.keys(facturacion).forEach((key) => (facturacion[key] = ''));
+  Object.keys(facturacion).forEach((key) => (facturacion[key] = key === 'CANTIDAD' ? 1 : ''));
+  facturacion.TOTAL_DE_LA_FACTURA = 0;
 };
 
 const validateForm = () => {
@@ -42,8 +41,17 @@ const validateForm = () => {
     if (typeof value === 'string') {
       return value.trim() !== '';
     }
-    return value !== null && value !== undefined; // Valida valores no nulos para otros tipos
+    return value !== null && value !== undefined;
   });
+};
+
+// Calcular total dinámicamente
+const calcularTotal = () => {
+  if (productoSeleccionado.value) {
+    const precio = parseFloat(productoSeleccionado.value.PRECIO || 0);
+    const cantidad = parseInt(facturacion.CANTIDAD || 1);
+    facturacion.TOTAL_DE_LA_FACTURA = precio * cantidad;
+  }
 };
 
 const saveForm = async () => {
@@ -52,12 +60,11 @@ const saveForm = async () => {
     return;
   }
 
-  // Convertir la fecha al formato requerido por MySQL
   facturacion.FACTURA_FECHA = dayjs(facturacion.FACTURA_FECHA).format('YYYY-MM-DD');
 
   loading.value = true;
   try {
-    const response = await axios.post(apiUrl, facturacion);
+    await axios.post(apiFacturacion, facturacion);
     alert('Factura registrada correctamente');
     resetForm();
   } catch (error) {
@@ -68,50 +75,47 @@ const saveForm = async () => {
   }
 };
 
-const updateForm = async () => {
-  if (!validateForm()) {
-    alert('Todos los campos son obligatorios');
-    return;
-  }
-  if (!facturacion.ID_FACTURA) {
-    alert('Debe especificar el ID de la factura para actualizar');
-    return;
-  }
-
-  // Convertir la fecha al formato requerido por MySQL
-  facturacion.FACTURA_FECHA = dayjs(facturacion.FACTURA_FECHA).format('YYYY-MM-DD');
-
-  loading.value = true;
+// Cargar datos de clientes y productos
+const fetchClientes = async () => {
   try {
-    const response = await axios.put(`${apiUrl}/${facturacion.ID_FACTURA}`, facturacion);
-    alert('Factura actualizada correctamente');
+    const response = await axios.get(apiClientes);
+    if (response.data.status === '200') {
+      clientes.value = response.data.data.map((cliente) => ({
+        value: cliente.ID_CLIENTE,
+        label: cliente.NOMBRE,
+      }));
+    }
   } catch (error) {
-    console.error('Error al actualizar:', error);
-    alert('Ocurrió un error al actualizar la factura');
-  } finally {
-    loading.value = false;
+    console.error('Error al cargar clientes:', error);
   }
 };
 
-const deleteForm = async () => {
-  if (!facturacion.ID_FACTURA) {
-    alert('Debe seleccionar una factura para eliminar');
-    return;
-  }
-  loading.value = true;
+const fetchProductos = async () => {
   try {
-    const response = await axios.delete(`${apiUrl}/${facturacion.ID_FACTURA}`);
-    alert('Factura eliminada correctamente');
-    resetForm();
+    const response = await axios.get(apiProductos);
+    if (response.data.status === '200') {
+      productos.value = response.data.data.map((producto) => ({
+        ...producto,
+        value: producto.ID_PRODUCTO,
+        label: producto.NOMBRE_PRODUCTO,
+      }));
+    }
   } catch (error) {
-    console.error('Error al eliminar:', error);
-    alert('Ocurrió un error al eliminar la factura');
-  } finally {
-    loading.value = false;
+    console.error('Error al cargar productos:', error);
   }
 };
+
+// Escuchar cambios en el producto seleccionado
+const actualizarProductoSeleccionado = (idProducto) => {
+  productoSeleccionado.value = productos.value.find((prod) => prod.ID_PRODUCTO === idProducto) || null;
+  calcularTotal();
+};
+
+onMounted(() => {
+  fetchClientes();
+  fetchProductos();
+});
 </script>
-
 
 <template>
   <el-header>
@@ -152,49 +156,76 @@ const deleteForm = async () => {
           <!-- Fila 2 -->
           <div class="row">
             <div class="col-md-6">
-              <el-form-item label="ID Cliente">
-                <el-input
+              <el-form-item label="Cliente">
+                <el-select
                   v-model="facturacion.ID_CLIENTE"
-                  placeholder="Ingrese el ID del cliente"
+                  placeholder="Seleccione un cliente"
                   size="large"
-                />
+                >
+                  <el-option
+                    v-for="cliente in clientes"
+                    :key="cliente.value"
+                    :label="cliente.label"
+                    :value="cliente.value"
+                  />
+                </el-select>
               </el-form-item>
             </div>
             <div class="col-md-6">
-              <el-form-item label="ID Producto">
-                <el-input
+              <el-form-item label="Producto">
+                <el-select
                   v-model="facturacion.ID_PRODUCTO"
-                  placeholder="Ingrese el ID del producto"
+                  placeholder="Seleccione un producto"
                   size="large"
-                />
+                  @change="actualizarProductoSeleccionado"
+                >
+                  <el-option
+                    v-for="producto in productos"
+                    :key="producto.value"
+                    :label="producto.label"
+                    :value="producto.value"
+                  />
+                </el-select>
               </el-form-item>
             </div>
           </div>
           <!-- Fila 3 -->
           <div class="row">
             <div class="col-md-6">
-              <el-form-item label="Método de Pago">
-  <el-select
-    v-model="facturacion.METODO_DE_PAGO"
-    placeholder="Seleccione el método de pago"
-    size="large"
-  >
-    <el-option
-      v-for="opcion in metodosDePago"
-      :key="opcion"
-      :label="opcion.label"
-      :value="opcion.value"
-    />
-  </el-select>
-</el-form-item>
-
+              <el-form-item label="Cantidad">
+                <el-input-number
+                  v-model="facturacion.CANTIDAD"
+                  :min="1"
+                  @change="calcularTotal"
+                  size="large"
+                />
+              </el-form-item>
             </div>
+            <div class="col-md-6">
+              <el-form-item label="Método de Pago">
+                <el-select
+                  v-model="facturacion.METODO_DE_PAGO"
+                  placeholder="Seleccione el método de pago"
+                  size="large"
+                >
+                  <el-option
+                    v-for="opcion in metodosDePago"
+                    :key="opcion.value"
+                    :label="opcion.label"
+                    :value="opcion.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
+          </div>
+          <!-- Fila 4 -->
+          <div class="row">
             <div class="col-md-6">
               <el-form-item label="Total de la Factura">
                 <el-input
-                  v-model="facturacion.TOTAL_DE_LA_FACTURA"
-                  placeholder="Ingrese el total"
+                  :value="facturacion.TOTAL_DE_LA_FACTURA.toFixed(2)"
                   size="large"
+                  readonly
                 />
               </el-form-item>
             </div>
@@ -209,6 +240,8 @@ const deleteForm = async () => {
     </div>
   </div>
 </template>
+
+
 
 <style scoped>
 .layout {
