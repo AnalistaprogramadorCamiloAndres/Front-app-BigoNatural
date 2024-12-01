@@ -103,7 +103,7 @@ onMounted(() => {
       </div>
       <el-card class="form-card" shadow="always">
         <el-table :data="facturas" style="width: 100%" v-loading="loading">
-          <el-table-column prop="ID_FACTURA" label="ID" />
+          <el-table-column prop="ID_FACTURA" label="ID"  width="50"/>
           <el-table-column label="Fecha">
             <template #default="scope">
               {{ formatFecha(scope.row.FACTURA_FECHA) }}
@@ -112,7 +112,7 @@ onMounted(() => {
           <el-table-column prop="cliente.NOMBRE" label="Nombre Cliente" />
           <el-table-column prop="producto.NOMBRE_PRODUCTO" label="Nombre Producto" />
           <el-table-column prop="TOTAL_DE_LA_FACTURA" label="Total" />
-          <el-table-column label="Acciones">
+          <el-table-column label="Acciones" width="200">
             <template #default="scope">
               <div class="action-buttons">
                 <el-button type="warning" @click="updateFactura(scope.row)">
