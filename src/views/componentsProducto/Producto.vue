@@ -1,93 +1,133 @@
 <script setup>
 import { ref } from 'vue';
 import SideBarMenu from '../../components/SideBarMenu.vue';
+import axios from 'axios';
 
 const Producto = ref({
-    ID_PRODUCTO: '',
     NOMBRE_PRODUCTO: '',
     DESCRIPCION: '',
     PRECIO: '',
     STOCK_DISPONIBLE: '',
 });
 
-const saveForm = () => {
+const saveForm = async () => {
+
+    const url = 'http://127.0.0.1:8000/api/api/producto';
+
     try {
         if (
-            !Producto.value.ID_PRODUCTO ||
             !Producto.value.NOMBRE_PRODUCTO ||
             !Producto.value.DESCRIPCION ||
             !Producto.value.PRECIO ||
             !Producto.value.STOCK_DISPONIBLE
-        ) {
-            alert('Producto guardado correctamente');
+        ) 
+        {
+            alert('Todos los campos son obligatorios');
             return;
         }
-        console.log('Todos los campos son obligatorios');
-        alert('Debe completar todos los campos');
-        Producto.value = {
-            ID_PRODUCTO: '',
-            NOMBRE_PRODUCTO: '',
-            DESCRIPCION: '',
-            PRECIO: '',
-            STOCK_DISPONIBLE: '',
+        console.log('cliente.value', Producto.value);
+        axios.post(url, Producto.value)
+            .then((response) => {
+                console.log('Respuesta:',response);
+                alert('Producto guardado correctamente');
+            
+                Producto.value = {
+                    NOMBRE_PRODUCTO: '',
+                    DESCRIPCION: '',
+                    PRECIO: '',
+                    STOCK_DISPONIBLE: '',
+                };
+            })
+                .catch((error) => {
+                    console.error(error);
+                    alert('Error al guardar el producto');
+                });
+                } catch (error) {
+                console.error(error);
+                alert('Error al guardar el producto');
+            }
         };
 
-    } catch (error) {
-        console.error(error);
-        alert('Error al guardar el producto');
-    }
-};
 
+const updateForm = async () => {
 
-const updateForm = () => {
+    const url = 'http://127.0.0.1:8000/api/api/producto';
+
     try {
         if (
-            !Producto.value.ID_PRODUCTO ||
+
             !Producto.value.NOMBRE_PRODUCTO ||
             !Producto.value.DESCRIPCION ||
             !Producto.value.PRECIO ||
             !Producto.value.STOCK_DISPONIBLE
-        ) {
-            alert('Producto actualizado correctamente');
+        ) 
+        {
+            alert('Todos los campos son obligatorios');
             return;
         }
-        console.log('Todos los campos son obligatorios');
-        alert('Debe completar todos los campos');
-        Producto.value = {
-            ID_PRODUCTO: '',
-            NOMBRE_PRODUCTO: '',
-            DESCRIPCION: '',
-            PRECIO: '',
-            STOCK_DISPONIBLE: '',
-        };
+      console.log('Producto.value', Producto.value);
+        axios.put(url, Producto.value)
+            .then((response) => {
+                console.log('Respuesta:', response);
+                alert('Producto actualizado correctamente');
+          
+                Producto.value = {
 
-    } catch (error) {
-        console.error(error);
-        alert('Error al actualizar el producto');
-    }
-};
+                    NOMBRE_PRODUCTO: '',
+                    DESCRIPCION: '',
+                    PRECIO: '',
+                    STOCK_DISPONIBLE: '',
+                };
+            })
+                .catch((error) => {
+                    console.error(error);
+                    alert('Error al actualizar el producto');
+                });
+            } catch (error) {
+                console.error(error);
+                alert('Error al seleccionar un producto');
+            }
+        };
 
 const deletForm = () => {
+
+    const url = 'http://127.0.0.1:8000/api/api/producto';
     try {
-        if (Producto.ID_PRODUCTO) {
-            alert('Producto eliminado correctamente');
+        if (
+
+            !Producto.value.NOMBRE_PRODUCTO ||
+            !Producto.value.DESCRIPCION ||
+            !Producto.value.PRECIO ||
+            !Producto.value.STOCK_DISPONIBLE
+
+        ) 
+        {
+            alert('Todos los campos son obligatorios');
             return;
         }
-        console.log('Debe seleccionar un producto');
-        alert('Debe seleccionar un producto para eliminar');
-        Producto.value = {
-            ID_PRODUCTO: '',
-            NOMBRE_PRODUCTO: '',
-            DESCRIPCION: '',
-            PRECIO: '',
-            STOCK_DISPONIBLE: '',
-        };
+        console.log('Producto.value', Producto.value);
+        axios.delete(url, Producto.value)
+            .then((response) => {
+                console.log('respuesta:',response);
+                alert('Producto eliminado correctamente');
+            
+                Producto.value = {
 
-    } catch (error) {
-        console.error(error);
-        alert('Error al eliminar el producto');
-    }
-};
+                    NOMBRE_PRODUCTO: '',
+                    DESCRIPCION: '',
+                    PRECIO: '',
+                    STOCK_DISPONIBLE: '',
+                };
+            })
+                .catch((error) => {
+                    console.error(error);
+                    alert('Error al eliminar el producto');
+                });
+            } catch (error) {
+                console.error(error);
+                alert('Error al seleccionar un producto');
+            }
+        };
 
 
 </script>
@@ -101,24 +141,24 @@ const deletForm = () => {
     <el-form>
 
 
-        <el-form-item label="ID PRODUCTO">
-            <el-input type="number" id="ID_PRODUCTO" v-model="Producto.ID_PRODUCTO" placeholder="Ingrese el ID del producto"></el-input>
-        </el-form-item>
-
         <el-form-item label="NOMBRE PRODUCTO">
-            <el-input type="text" id="NOMBRE_PRODUCTO" v-model="Producto.NOMBRE_PRODUCTO" placeholder="Ingrese el nombre del producto"></el-input>
+            <el-input type="text" id="NOMBRE_PRODUCTO" v-model="Producto.NOMBRE_PRODUCTO"
+                placeholder="Ingrese el nombre del producto"></el-input>
         </el-form-item>
 
         <el-form-item label="DESCRIPCION">
-            <el-input type="text" id="DESCRIPCION" v-model="Producto.DESCRIPCION" placeholder="Ingrese la descripción del producto"></el-input>
+            <el-input type="text" id="DESCRIPCION" v-model="Producto.DESCRIPCION"
+                placeholder="Ingrese la descripción del producto"></el-input>
         </el-form-item>
 
         <el-form-item :label="'PRECIO'">
-            <el-input type="number" id="PRECIO" v-model="Producto.PRECIO" placeholder="Ingrese el precio del producto"></el-input>
+            <el-input type="number" id="PRECIO" v-model="Producto.PRECIO"
+                placeholder="Ingrese el precio del producto"></el-input>
         </el-form-item>
 
         <el-form-item label="STOCK DISPONIBLE">
-            <el-input type="text" id="STOCK_DISPONIBLE" v-model="Producto.STOCK_DISPONIBLE" placeholder="Ingrese el stock disponible del producto"></el-input>
+            <el-input type="text" id="STOCK_DISPONIBLE" v-model="Producto.STOCK_DISPONIBLE"
+                placeholder="Ingrese el stock disponible del producto"></el-input>
         </el-form-item>
 
     </el-form>
