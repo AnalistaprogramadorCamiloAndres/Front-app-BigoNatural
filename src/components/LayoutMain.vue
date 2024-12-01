@@ -2,13 +2,14 @@
 import Login from '../components/Login.vue';
 import Formulario from '../components/Formulario.vue';
 import SideBarMenu from '../components/SideBarMenu.vue';
-//import NavBar from '../components/NavBar.vue';
+import NavBar from '../components/NavBar.vue';
 
 
 
 </script>
 
 <template>
+
   <Formulario />
 
   <el-login>
@@ -18,9 +19,14 @@ import SideBarMenu from '../components/SideBarMenu.vue';
 
   <el-container style="height: 100vh;">
 
+    
+  <el-header class="el-header">
+    <NavBar />
+  </el-header> -->
+
     <el-container>
       <el-aside width="auto">
-        <SideBarMenu />
+        <SideBarMenu /> -->
       </el-aside>
 
       <el-main class="main-content">
@@ -29,9 +35,6 @@ import SideBarMenu from '../components/SideBarMenu.vue';
     </el-container>
   </el-container>
 
-  <el-header class="el-header">
-    <NavBar />
-  </el-header>
 </template>
 
 <style scoped>

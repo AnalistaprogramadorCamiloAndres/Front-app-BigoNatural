@@ -8,6 +8,7 @@ import producto from '../views/componentsProducto/producto.vue';
 import Proveedor from '../views/componentsProveedor/proveedor.vue';
 
 const routes = [
+    
   
   {
     path:'/',
