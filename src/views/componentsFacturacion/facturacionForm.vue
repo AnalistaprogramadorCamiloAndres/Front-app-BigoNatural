@@ -1,10 +1,17 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElNotification } from 'element-plus';
 import SideBarMenu from '../../components/SideBarMenu.vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
-// Datos reactivos para el formulario
+const router = useRouter();
+
+const volver = () => {
+  router.push('/facturacion');
+};
+
 const facturacion = reactive({
   ID_CLIENTE: '',
   ID_FACTURA: '',
@@ -26,15 +33,11 @@ const productos = ref([]);
 const productoSeleccionado = ref(null);
 const loading = ref(false);
 
-// API URLs
 const apiFacturacion = 'http://127.0.0.1:8000/api/api/facturacion';
 const apiClientes = 'http://127.0.0.1:8000/api/api/cliente';
 const apiProductos = 'http://127.0.0.1:8000/api/api/producto';
 
-// Listado de facturas
-const facturas = ref([]);
 
-// Funciones para el formulario
 const resetForm = () => {
   Object.keys(facturacion).forEach((key) => (facturacion[key] = key === 'CANTIDAD' ? 1 : ''));
   facturacion.TOTAL_DE_LA_FACTURA = 0;
@@ -59,7 +62,12 @@ const calcularTotal = () => {
 
 const saveForm = async () => {
   if (!validateForm()) {
-    alert('Todos los campos son obligatorios');
+    ElNotification({
+      title: 'Error',
+      message: 'Todos los campos son obligatorios.',
+      type: 'error',
+      duration: 3000,
+    });
     return;
   }
 
@@ -68,18 +76,26 @@ const saveForm = async () => {
   loading.value = true;
   try {
     await axios.post(apiFacturacion, facturacion);
-    alert('Factura registrada correctamente');
+    ElNotification({
+      title: 'Éxito',
+      message: 'Factura registrada correctamente',
+      type: 'success',
+      duration: 3000,
+    });
     resetForm();
-    fetchFacturas(); // Actualiza el listado después de guardar
   } catch (error) {
     console.error('Error al guardar:', error);
-    alert('Ocurrió un error al guardar la factura');
+    ElNotification({
+        title: 'Error',
+        message: 'Ocurrió un error al guardar la factura.',
+        type: 'error',
+        duration: 3000,
+      });
   } finally {
     loading.value = false;
   }
 };
 
-// Cargar datos de clientes y productos
 const fetchClientes = async () => {
   try {
     const response = await axios.get(apiClientes);
@@ -114,97 +130,49 @@ const actualizarProductoSeleccionado = (idProducto) => {
   calcularTotal();
 };
 
-// Cargar listado de facturas
-const fetchFacturas = async () => {
-  loading.value = true;
-  try {
-    const response = await axios.get(apiFacturacion);
-    if (response.data.status === '200') {
-      facturas.value = response.data.data;
-    }
-  } catch (error) {
-    console.error('Error al cargar las facturas:', error);
-    alert('Ocurrió un error al cargar las facturas.');
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Inicializar datos al montar
 onMounted(() => {
   fetchClientes();
   fetchProductos();
-  fetchFacturas();
 });
 </script>
 
 <template>
-  <el-header>
-    <NavBar />
-  </el-header>
-
   <div class="layout">
     <div class="sidebar">
       <SideBarMenu />
     </div>
-
     <div class="content">
-      <!-- Formulario -->
-      <h1 class="form-title">MODULO FACTURA</h1>
+      <h2 class="form-title">AGREGAR FACTURA</h2>
       <el-card class="form-card" shadow="always">
         <el-form label-position="top" class="form">
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Fecha de la Factura">
-                <el-date-picker
-                  v-model="facturacion.FACTURA_FECHA"
-                  type="date"
-                  placeholder="Seleccione la fecha"
-                  size="large"
-                />
+                <el-date-picker v-model="facturacion.FACTURA_FECHA" type="date" placeholder="Seleccione la fecha"
+                  size="large" />
               </el-form-item>
             </div>
             <div class="col-md-6">
               <el-form-item label="ID Factura">
-                <el-input
-                  v-model="facturacion.ID_FACTURA"
-                  placeholder="Ingrese el ID de la factura"
-                  size="large"
-                />
+                <el-input v-model="facturacion.ID_FACTURA" placeholder="Ingrese el ID de la factura" size="large" />
               </el-form-item>
             </div>
           </div>
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Cliente">
-                <el-select
-                  v-model="facturacion.ID_CLIENTE"
-                  placeholder="Seleccione un cliente"
-                  size="large"
-                >
-                  <el-option
-                    v-for="cliente in clientes"
-                    :key="cliente.value"
-                    :label="cliente.label"
-                    :value="cliente.value"
-                  />
+                <el-select v-model="facturacion.ID_CLIENTE" placeholder="Seleccione un cliente" size="large">
+                  <el-option v-for="cliente in clientes" :key="cliente.value" :label="cliente.label"
+                    :value="cliente.value" />
                 </el-select>
               </el-form-item>
             </div>
             <div class="col-md-6">
               <el-form-item label="Producto">
-                <el-select
-                  v-model="facturacion.ID_PRODUCTO"
-                  placeholder="Seleccione un producto"
-                  size="large"
-                  @change="actualizarProductoSeleccionado"
-                >
-                  <el-option
-                    v-for="producto in productos"
-                    :key="producto.value"
-                    :label="producto.label"
-                    :value="producto.value"
-                  />
+                <el-select v-model="facturacion.ID_PRODUCTO" placeholder="Seleccione un producto" size="large"
+                  @change="actualizarProductoSeleccionado">
+                  <el-option v-for="producto in productos" :key="producto.value" :label="producto.label"
+                    :value="producto.value" />
                 </el-select>
               </el-form-item>
             </div>
@@ -212,27 +180,14 @@ onMounted(() => {
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Cantidad">
-                <el-input-number
-                  v-model="facturacion.CANTIDAD"
-                  :min="1"
-                  @change="calcularTotal"
-                  size="large"
-                />
+                <el-input-number v-model="facturacion.CANTIDAD" :min="1" @change="calcularTotal" size="large" />
               </el-form-item>
             </div>
             <div class="col-md-6">
               <el-form-item label="Método de Pago">
-                <el-select
-                  v-model="facturacion.METODO_DE_PAGO"
-                  placeholder="Seleccione el método de pago"
-                  size="large"
-                >
-                  <el-option
-                    v-for="opcion in metodosDePago"
-                    :key="opcion.value"
-                    :label="opcion.label"
-                    :value="opcion.value"
-                  />
+                <el-select v-model="facturacion.METODO_DE_PAGO" placeholder="Seleccione el método de pago" size="large">
+                  <el-option v-for="opcion in metodosDePago" :key="opcion.value" :label="opcion.label"
+                    :value="opcion.value" />
                 </el-select>
               </el-form-item>
             </div>
@@ -240,29 +195,15 @@ onMounted(() => {
           <div class="row">
             <div class="col-md-6">
               <el-form-item label="Total de la Factura">
-                <el-input
-                  :value="facturacion.TOTAL_DE_LA_FACTURA.toFixed(2)"
-                  size="large"
-                  readonly
-                />
+                <el-input :value="facturacion.TOTAL_DE_LA_FACTURA.toFixed(2)" size="large" readonly />
               </el-form-item>
             </div>
           </div>
         </el-form>
         <div class="actions">
+          <el-button type="warning" :loading="loading" @click="volver" size="large">Volver</el-button>
           <el-button type="primary" :loading="loading" @click="saveForm" size="large">Guardar</el-button>
         </div>
-      </el-card>
-
-      <!-- Listado de Facturas -->
-      <h2 class="form-title">LISTADO DE FACTURAS</h2>
-      <el-card class="form-card" shadow="always">
-        <el-table :data="facturas" style="width: 100%" v-loading="loading">
-          <el-table-column prop="ID_FACTURA" label="ID Factura" width="150" />
-          <el-table-column prop="FACTURA_FECHA" label="Fecha" width="150" />
-          <el-table-column prop="ID_CLIENTE" label="ID Cliente" width="150" />
-          <el-table-column prop="TOTAL_DE_LA_FACTURA" label="Total" width="150" />
-        </el-table>
       </el-card>
     </div>
   </div>
@@ -271,16 +212,19 @@ onMounted(() => {
 <style scoped>
 .layout {
   display: flex;
-  min-height: 100vh; /* Asegura que la altura mínima sea el 100% de la pantalla */
-  overflow: hidden; /* Evita que el contenido se desborde horizontalmente */
+  min-height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar {
-  width: 200px;
-  background-color: #333;
   color: #fff;
-  padding: 20px;
-  overflow-y: auto; /* Permite desplazamiento si el contenido en la barra lateral excede su tamaño */
+  overflow-y: auto;
+}
+
+.add-button {
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  min-width: 180px;
 }
 
 .content {
@@ -291,9 +235,9 @@ onMounted(() => {
   align-items: center;
   background-color: #f2f3f5;
   gap: 20px;
-  overflow-y: auto; /* Permite desplazamiento vertical */
-  max-height: 100vh; /* Restringe la altura máxima al tamaño de la pantalla */
-  box-sizing: border-box; /* Incluye el padding dentro del tamaño total del contenedor */
+  overflow-y: auto;
+  max-height: 100vh;
+  box-sizing: border-box;
 }
 
 .form-title {
@@ -303,13 +247,14 @@ onMounted(() => {
   margin: 20px 0;
 }
 
-.form-card, .table-card {
-  width: 90%; /* Ajusta el ancho a un 90% para mayor consistencia */
+.form-card,
+.table-card {
+  width: 90%;
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background: #fff;
-  overflow: visible; /* Asegura que no se corten los campos dentro del formulario */
+  overflow: visible;
 }
 
 .table-card {
@@ -323,7 +268,6 @@ onMounted(() => {
 .row {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 20px;
 }
 
 .col-md-6 {
@@ -345,7 +289,7 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-.actions > .el-button {
+.actions>.el-button {
   min-width: 150px;
 }
 
@@ -353,11 +297,32 @@ onMounted(() => {
   width: 100%;
 }
 
-/* Asegura el desplazamiento en pantallas pequeñas */
-html, body {
-  height: 100%; /* Asegura que el body ocupe toda la pantalla */
+html,
+body {
+  height: 100%;
   margin: 0;
   padding: 0;
-  overflow-y: auto; /* Permite el desplazamiento vertical de toda la página */
+  overflow: hidden;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f2f3f5;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.el-overlay {
+  z-index: 9999 !important;
 }
 </style>
