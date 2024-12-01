@@ -1,26 +1,26 @@
 <script setup>
 import { ref } from 'vue';
 import SideBarMenu from '../../components/SideBarMenu.vue';
-
+import axios from 'axios';
 
 const facturacion = ref({
   ID_CLIENTE: '',
-  ID_FACTURA: '',
   FACTURA_FECHA: '',
   TOTAL_DE_LA_FACTURA: '',
   METODO_DE_PAGO: '',
   ID_PRODUCTO: '',
   ID_CLIENTE: '',
 });
+
+
 const saveForm = () => {
 
-  const url = 'http://127.0.0.1:8000/api/api/facturacion/SAVE';
+  const url = 'http://127.0.0.1:8000/api/api/facturacion';
 
   try {
 
     if (
       !facturacion.value.ID_CLIENTE ||
-      !facturacion.value.ID_FACTURA ||
       !facturacion.value.FACTURA_FECHA ||
       !facturacion.value.TOTAL_DE_LA_FACTURA ||
       !facturacion.value.METODO_DE_PAGO ||
@@ -29,15 +29,14 @@ const saveForm = () => {
       alert('Todos los campos son obligatorios');
       return;
     }
-
-    axios.get(url, facturacion.value)
+    console.log(facturacion.value, 'facturacion.value');
+    axios.post(url, facturacion.value)
       .then((response) => {
         console.log('Respuesta:', response);
         alert('Factura registrada correctamente');
 
         facturacion.value = {
           ID_CLIENTE: '',
-          ID_FACTURA: '',
           FACTURA_FECHA: '',
           TOTAL_DE_LA_FACTURA: '',
           METODO_DE_PAGO: '',
@@ -56,7 +55,7 @@ const saveForm = () => {
 
 const updateForm = () => {
 
-  const url = 'http://127.0.0.1:8000/api/api/facturacion/UPDATE/';
+  const url = 'http://127.0.0.1:8000/api/api/facturacion';
 
   try {
     if (
@@ -89,7 +88,7 @@ const updateForm = () => {
 
 
 const deletForm = () => {
-  const url = 'http://127.0.0.1:8000/api/api/facturacion/DELETE/';
+  const url = 'http://127.0.0.1:8000/api/api/facturacion';
   try {
     if (facturacion.value.ID_CLIENTE === '' || facturacion.value.ID_FACTURA === '') {
       alert('Debe seleccionar una factura para eliminar');
@@ -119,6 +118,10 @@ const deletForm = () => {
 </script>
 
 <template>
+  <el-header class="el-header">
+    <NavBar />
+  </el-header>
+
   <div class="sidebar">
     <SideBarMenu />
   </div>
@@ -134,8 +137,6 @@ const deletForm = () => {
       <label for="ID_CLIENTE">ID Cliente:</label>
       <input type="text" id="ID_CLIENTE" v-model="facturacion.ID_CLIENTE">
 
-      <label for="ID_CLIENTE">ID Cliente:</label>
-      <input type="text" id="ID_CLIENTE" v-model="facturacion.ID_CLIENTE">
 
       <label for="ID_FACTURA">ID Factura:</label>
       <input type="text" id="ID_FACTURA" v-model="facturacion.ID_FACTURA">
@@ -152,8 +153,7 @@ const deletForm = () => {
       <label for="ID_PRODUCTO">ID Producto:</label>
       <input type="text" id="ID_PRODUCTO" v-model="facturacion.ID_PRODUCTO">
 
-      <label for="ID_CLIENTE">ID Cliente:</label>
-      <input type="text" id="ID_CLIENTE" v-model="facturacion.ID_CLIENTE">
+
 
     </div>
   </el-form-item>
@@ -216,8 +216,9 @@ const deletForm = () => {
   overflow-y: auto;
   transition: all 0.3s ease;
 }
+
 .el-button {
-  
+
   width: 100%;
   display: flex;
   justify-content: center;
